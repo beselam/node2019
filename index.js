@@ -46,7 +46,7 @@ app.listen(30000);
   }) */
 
   
-  app.post('/animal', bodyparcer.urlencoded(), async (req , res) => {
+  app.post('/animal', bodyparcer.urlencoded({extended: true}), async (req , res) => {
     console.log(req.body);
    try{
     const [results] = await connection.query(
