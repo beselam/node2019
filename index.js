@@ -2,8 +2,12 @@
 const express = require('express');
 const connection = require('./model/db.js');
 const app = express();
+const bodyparcer = require('body-parser');
 
-  app.get('/animal', async (req,res)=>{
+app.use(express.static('public'));
+app.listen(30000);
+
+  app.get('/animals', async (req,res)=>{
       try{
     const [results, fields] = await connection.query(
           'SELECT * FROM animal');
@@ -18,8 +22,45 @@ const app = express();
         
     }
       
+  });  
+
+  app.get('/animal' , async (req,res) => {
+  console.log(req.query);
+  //res.send(`qoer ${req.query}`);
+  try {
+    const [results] = await connection.query(
+      'SELECT * FROM animal WHERE name LIKE ?',
+      [req.query.name]);
+      res.json(results);
+
+    } catch(e) {
+      res.send(`de error ${e}`);
+    }
+
   });
 
+ /* app.post('/animal', async (req , res) => {
+    console.log(req.body);
+    res.send('will do asap');
+    
+  }) */
+
+  
+  app.post('/animal', bodyparcer.urlencoded(), async (req , res) => {
+    console.log(req.body);
+   try{
+    const [results] = await connection.query(
+    'INSERT INTO animal (name) VALUES (?)',
+    [req.body.name]
+    );
+    res.json(results);
+   } catch (e){
+     console.log(e);
+     res.send('db error');
+     
+   }
+    
+  })
 
 /* app.get('/',(req,res)=>{
 	console.log("app");
@@ -30,6 +71,5 @@ const app = express();
     res.send('demo');
    }); 
  */
-app.use(express.static('public'));
-app.listen(30000);
+
 
