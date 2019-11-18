@@ -1,43 +1,30 @@
 'use strict'
+
 const express = require('express');
-const connection = require('./model/db.js');
 const app = express();
-const bodyparcer = require('body-parser');
+const bodyparser = require('body-parser');
+const animal= require('./model/animal.js');
 
 app.use(express.static('public'));
 app.listen(30000);
 
-  app.get('/animals', async (req,res)=>{
-      try{
-    const [results, fields] = await connection.query(
-          'SELECT * FROM animal');
-         
-              console.log(results);
-              console.log(fields);
-              res.json(results);
-              
-    } catch (e){
-        console.log(e);
-        res.send('db error');
-        
-    }
-      
-  });  
-
-  app.get('/animal' , async (req,res) => {
-  console.log(req.query);
-  //res.send(`qoer ${req.query}`);
+app.get('/animals', async (req, res) => {
   try {
-    const [results] = await connection.query(
-      'SELECT * FROM animal WHERE name LIKE ?',
-      [req.query.name]);
-      res.json(results);
+    res.json(await animal.getAll());
+  } catch (e) {
+    console.log(e);
+    res.send('db error :(');
+  }
+});
 
-    } catch(e) {
-      res.send(`de error ${e}`);
-    }
-
-  });
+app.get('/animal', async (req, res) => {
+  console.log(req.query);
+  try {
+    res.json(await animal.search(req.query.name));
+  } catch(e) {
+    res.send(`db error`);
+  }
+});
 
  /* app.post('/animal', async (req , res) => {
     console.log(req.body);
@@ -46,21 +33,15 @@ app.listen(30000);
   }) */
 
   
-  app.post('/animal', bodyparcer.urlencoded({extended: true}), async (req , res) => {
+  app.post('/animal', bodyparser.urlencoded({extended: true}), async (req, res) => {
     console.log(req.body);
-   try{
-    const [results] = await connection.query(
-    'INSERT INTO animal (name) VALUES (?)',
-    [req.body.name]
-    );
-    res.json(results);
-   } catch (e){
-     console.log(e);
-     res.send('db error');
-     
-   }
-    
-  })
+    try {
+      res.json(await animal.insert(req.body.name));
+    } catch (e) {
+      console.log(e);
+      res.send('db error');
+    }
+  });
 
 /* app.get('/',(req,res)=>{
 	console.log("app");
