@@ -1,12 +1,22 @@
-'use strict'
+'use strict';
 
 const express = require('express');
+const animal = require('./model/animal');
+
 const app = express();
-const bodyparser = require('body-parser');
-const animal= require('./model/animal.js');
+
+if(process.env.SERVER === 'dev_localhost') {
+  require('./secure/localhost')(app);
+} else {
+  require('./secure/server')(app);
+  app.listen(3000, () => {
+    console.log('server app start?');
+  });
+}
+
+const bodyParser = require('body-parser');
 
 app.use(express.static('public'));
-app.listen(30000);
 
 app.get('/animals', async (req, res) => {
   try {
@@ -26,31 +36,27 @@ app.get('/animal', async (req, res) => {
   }
 });
 
- /* app.post('/animal', async (req , res) => {
-    console.log(req.body);
-    res.send('will do asap');
-    
-  }) */
-
-  
-  app.post('/animal', bodyparser.urlencoded({extended: true}), async (req, res) => {
-    console.log(req.body);
-    try {
-      res.json(await animal.insert(req.body.name));
-    } catch (e) {
-      console.log(e);
-      res.send('db error');
-    }
-  });
-
-/* app.get('/',(req,res)=>{
-	console.log("app");
- res.send('hellow from my node server');
+app.post('/animal', bodyParser.urlencoded({extended: true}), async (req, res) => {
+  console.log(req.body);
+  try {
+    res.json(await animal.insert(req.body.name));
+  } catch (e) {
+    console.log(e);
+    res.send('db error');
+  }
 });
- app.get('/demo',(req,res)=>{
-	console.log("demo app");
-    res.send('demo');
-   }); 
- */
+
+app.get('/', (req, res) => {
+  if(req.secure) {
+    res.send('Hello secure');
+  } else {
+    res.send('Hello form my Node server unsecure');
+  }
+});
+
+app.get('/demo', (req, res) => {
+  console.log('request', req);
+  res.send('demo');
+});
 
 
