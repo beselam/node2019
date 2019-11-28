@@ -6,7 +6,7 @@ module.exports = (app) => {
             next();
         }
         else{
-            res.redirect(301, `https://${req.headers.host}/app/${req.url}`);
+            res.redirect(301, `https://${req.headers.host}/app${req.url}`);
         }
     });
 }
