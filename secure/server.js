@@ -2,6 +2,7 @@
 module.exports = (app) => {
     app.enable('trust proxy');
     app.use((req,res,next)=>{
+        console.log('will redierct?', req.secure)
         if(req.secure){
             next();
         }
